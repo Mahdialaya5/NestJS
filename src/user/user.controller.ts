@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus,Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus,Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CreatedUserDto, LoginUserDto, UpdateUserDto } from './dto';
 import { userPipe } from './user.pipe';
 import { UserService } from './user.service';
 import mongoose from 'mongoose';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/config/multer.config';
 
 @Controller("user")
 export class UserController {
@@ -11,8 +13,9 @@ export class UserController {
      
     @Post()
     @HttpCode(HttpStatus.CREATED) 
-    CreateUser(@Body() CreatedUserDto: CreatedUserDto) {
-      return this.UserServices.CreateUser(CreatedUserDto);
+    @UseInterceptors(FileInterceptor('imgsrc',multerOptions))
+    CreateUser(@Body() CreatedUserDto: CreatedUserDto,@UploadedFile() file: Express.Multer.File) {
+      return this.UserServices.CreateUser(CreatedUserDto,file);
     }
 
     @Get()
